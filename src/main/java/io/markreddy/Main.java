@@ -41,23 +41,7 @@ public class Main {
                         new SimpleStringSchema(),
                         parameterTool.getProperties()));
 
-        messageStream.rebalance().addSink(new ElasticsearchSink<>(config, transportAddresses, new ElasticsearchSinkFunction<String>() {
-            private IndexRequest createIndexRequest(String element) {
-                Map<String, String> json = new HashMap<>();
-                json.put("data", element);
-
-                return Requests.indexRequest()
-                        .index("my-index")
-                        .type("my-type")
-                        .source(json);
-            }
-
-            @Override
-            public void process(String element, RuntimeContext ctx, RequestIndexer indexer) {
-                indexer.add(createIndexRequest(element));
-            }
-
-        }));
+        messageStream.rebalance().addSink(new ElasticsearchSink<>(config, transportAddresses, getEsSinkFunction()));
 
         env.execute("Kafka to ES Stream");
 
